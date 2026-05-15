@@ -6,6 +6,7 @@ use App\PemberianPakan;
 use App\DataTernak;
 use App\DataPakan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PemberianPakanController extends Controller
 {
@@ -39,9 +40,10 @@ class PemberianPakanController extends Controller
             ])->withInput();
         }
 
-        PemberianPakan::create($request->all());
-
-        $pakan->decrement('stok', $request->jumlah);
+        DB::transaction(function () use ($request, $pakan) {
+            PemberianPakan::create($request->all());
+            $pakan->decrement('stok', $request->jumlah);
+        });
 
         return redirect()->route('pemberian-pakan.index')
                          ->with('success', 'Pemberian pakan berhasil dicatat.');
@@ -72,20 +74,20 @@ class PemberianPakanController extends Controller
             'jumlah'    => 'required|numeric|min:0.01',
         ]);
 
-        // kembalikan stok lama
-        $pakanLama = DataPakan::findOrFail($pemberian->pakan_id);
-        $pakanLama->increment('stok', $pemberian->jumlah);
+        DB::transaction(function () use ($request, $pemberian) {
+            // kembalikan stok lama
+            $pakanLama = DataPakan::findOrFail($pemberian->pakan_id);
+            $pakanLama->increment('stok', $pemberian->jumlah);
 
-        // cek stok baru
-        $pakanBaru = DataPakan::findOrFail($request->pakan_id);
-        if ($pakanBaru->stok < $request->jumlah) {
-            return back()->withErrors([
-                'jumlah' => 'Jumlah melebihi stok tersedia (' . $pakanBaru->stok . ' ' . $pakanBaru->satuan . ')'
-            ])->withInput();
-        }
+            // cek stok baru
+            $pakanBaru = DataPakan::findOrFail($request->pakan_id);
+            if ($pakanBaru->stok < $request->jumlah) {
+                throw new \Exception('Jumlah melebihi stok tersedia (' . $pakanBaru->stok . ' ' . $pakanBaru->satuan . ')');
+            }
 
-        $pemberian->update($request->all());
-        $pakanBaru->decrement('stok', $request->jumlah);
+            $pemberian->update($request->all());
+            $pakanBaru->decrement('stok', $request->jumlah);
+        });
 
         return redirect()->route('pemberian-pakan.index')
                          ->with('success', 'Data pemberian pakan berhasil diperbarui.');

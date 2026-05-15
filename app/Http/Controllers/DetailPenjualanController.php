@@ -6,6 +6,7 @@ use App\DetailPenjualan;
 use App\Penjualan;
 use App\DataTernak;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DetailPenjualanController extends Controller
 {
@@ -30,16 +31,18 @@ class DetailPenjualanController extends Controller
             'harga'        => 'required|numeric|min:0',
         ]);
 
-        DetailPenjualan::create($request->all());
+        DB::transaction(function () use ($request) {
+            DetailPenjualan::create($request->all());
 
-        // update total harga di penjualan
-        $penjualan = Penjualan::findOrFail($request->penjualan_id);
-        $total     = DetailPenjualan::where('penjualan_id', $penjualan->penjualan_id)->sum('harga');
-        $penjualan->update(['total_harga' => $total]);
+            // update total harga di penjualan
+            $penjualan = Penjualan::findOrFail($request->penjualan_id);
+            $total     = DetailPenjualan::where('penjualan_id', $penjualan->penjualan_id)->sum('harga');
+            $penjualan->update(['total_harga' => $total]);
 
-        // update status ternak jadi dijual
-        DataTernak::where('ternak_id', $request->ternak_id)
-                  ->update(['status' => 'dijual']);
+            // update status ternak jadi dijual
+            DataTernak::where('ternak_id', $request->ternak_id)
+                      ->update(['status' => 'dijual']);
+        });
 
         return redirect()->route('detail-penjualan.index')
                          ->with('success', 'Detail penjualan berhasil ditambahkan.');

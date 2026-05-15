@@ -56,7 +56,7 @@ class TernakController extends Controller
         $ternak = DataTernak::findOrFail($id);
 
         $request->validate([
-            'kode_ternak'   => 'required|string|max:50|unique:data_ternak,kode_ternak,' . $id . ',ternak_id',
+            'kode_ternak'   => 'required|string|max:50|unique:data_ternak,kode_ternak,' . $ternak->ternak_id . ',ternak_id',
             'jenis_hewan'   => 'required|in:sapi,kambing,ayam',
             'jenis_kelamin' => 'required|in:jantan,betina',
             'tanggal_masuk' => 'required|date',

@@ -1,61 +1,94 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TernakController;
 use App\Http\Controllers\KandangController;
-use App\Http\Controllers\KesehatanController;
 use App\Http\Controllers\PakanController;
+use App\Http\Controllers\KesehatanController;
+use App\Http\Controllers\PemberianPakanController;
+use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\DetailPenjualanController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Dashboard (hanya satu kali)
+Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+// Logout
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
+
+// =============================================
+// RESOURCE TERNAK
+// =============================================
+Route::prefix('ternak')->name('ternak.')->group(function () {
+    Route::get('/', [TernakController::class, 'index'])->name('index');
+    Route::get('/create', [TernakController::class, 'create'])->name('create');
+    Route::post('/', [TernakController::class, 'store'])->name('store');
+    Route::get('/{ternak}', [TernakController::class, 'show'])->name('show');
+    Route::get('/{ternak}/edit', [TernakController::class, 'edit'])->name('edit');
+    Route::put('/{ternak}', [TernakController::class, 'update'])->name('update');
+    Route::delete('/{ternak}', [TernakController::class, 'destroy'])->name('destroy');
 });
 
+// =============================================
+// RESOURCE KANDANG
+// =============================================
+Route::prefix('kandang')->name('kandang.')->group(function () {
+    Route::get('/', [KandangController::class, 'index'])->name('index');
+    Route::get('/create', [KandangController::class, 'create'])->name('create');
+    Route::post('/', [KandangController::class, 'store'])->name('store');
+    Route::get('/{kandang}', [KandangController::class, 'show'])->name('show');
+    Route::get('/{kandang}/edit', [KandangController::class, 'edit'])->name('edit');
+    Route::put('/{kandang}', [KandangController::class, 'update'])->name('update');
+    Route::delete('/{kandang}', [KandangController::class, 'destroy'])->name('destroy');
+});
 
+// =============================================
+// RESOURCE PAKAN
+// =============================================
+Route::prefix('pakan')->name('pakan.')->group(function () {
+    Route::get('/', [PakanController::class, 'index'])->name('index');
+    Route::get('/create', [PakanController::class, 'create'])->name('create');
+    Route::post('/', [PakanController::class, 'store'])->name('store');
+    Route::get('/{pakan}', [PakanController::class, 'show'])->name('show');
+    Route::get('/{pakan}/edit', [PakanController::class, 'edit'])->name('edit');
+    Route::put('/{pakan}', [PakanController::class, 'update'])->name('update');
+    Route::delete('/{pakan}', [PakanController::class, 'destroy'])->name('destroy');
+});
 
+// =============================================
+// RESOURCE KESEHATAN
+// =============================================
+Route::prefix('kesehatan')->name('kesehatan.')->group(function () {
+    Route::get('/', [KesehatanController::class, 'index'])->name('index');
+    Route::get('/create', [KesehatanController::class, 'create'])->name('create');
+    Route::post('/', [KesehatanController::class, 'store'])->name('store');
+    Route::get('/{kesehatan}', [KesehatanController::class, 'show'])->name('show');
+    Route::get('/{kesehatan}/edit', [KesehatanController::class, 'edit'])->name('edit');
+    Route::put('/{kesehatan}', [KesehatanController::class, 'update'])->name('update');
+    Route::delete('/{kesehatan}', [KesehatanController::class, 'destroy'])->name('destroy');
+});
 
+// =============================================
+// RESOURCE PEMBERIAN PAKAN
+// =============================================
+Route::resource('pemberian-pakan', PemberianPakanController::class);
 
-// TERNAK
-Route::get('/ternak',               [TernakController::class, 'index'])->name('ternak.index');
-Route::get('/ternak/create',        [TernakController::class, 'create'])->name('ternak.create');
-Route::post('/ternak',              [TernakController::class, 'store'])->name('ternak.store');
-Route::get('/ternak/{id}',          [TernakController::class, 'show'])->name('ternak.show');
-Route::get('/ternak/{id}/edit',     [TernakController::class, 'edit'])->name('ternak.edit');
-Route::put('/ternak/{id}',          [TernakController::class, 'update'])->name('ternak.update');
-Route::delete('/ternak/{id}',       [TernakController::class, 'destroy'])->name('ternak.destroy');
+// =============================================
+// RESOURCE PENJUALAN
+// =============================================
+Route::resource('penjualan', PenjualanController::class);
 
-// KANDANG
-Route::get('/kandang',              [KandangController::class, 'index'])->name('kandang.index');
-Route::get('/kandang/create',       [KandangController::class, 'create'])->name('kandang.create');
-Route::post('/kandang',             [KandangController::class, 'store'])->name('kandang.store');
-Route::get('/kandang/{id}',         [KandangController::class, 'show'])->name('kandang.show');
-Route::get('/kandang/{id}/edit',    [KandangController::class, 'edit'])->name('kandang.edit');
-Route::put('/kandang/{id}',         [KandangController::class, 'update'])->name('kandang.update');
-Route::delete('/kandang/{id}',      [KandangController::class, 'destroy'])->name('kandang.destroy');
-
-// PAKAN
-Route::get('/pakan',                [PakanController::class, 'index'])->name('pakan.index');
-Route::get('/pakan/create',         [PakanController::class, 'create'])->name('pakan.create');
-Route::post('/pakan',               [PakanController::class, 'store'])->name('pakan.store');
-Route::get('/pakan/{id}',           [PakanController::class, 'show'])->name('pakan.show');
-Route::get('/pakan/{id}/edit',      [PakanController::class, 'edit'])->name('pakan.edit');
-Route::put('/pakan/{id}',           [PakanController::class, 'update'])->name('pakan.update');
-Route::delete('/pakan/{id}',        [PakanController::class, 'destroy'])->name('pakan.destroy');
-
-// KESEHATAN
-Route::get('/kesehatan',            [KesehatanController::class, 'index'])->name('kesehatan.index');
-Route::get('/kesehatan/create',     [KesehatanController::class, 'create'])->name('kesehatan.create');
-Route::post('/kesehatan',           [KesehatanController::class, 'store'])->name('kesehatan.store');
-Route::get('/kesehatan/{id}',       [KesehatanController::class, 'show'])->name('kesehatan.show');
-Route::get('/kesehatan/{id}/edit',  [KesehatanController::class, 'edit'])->name('kesehatan.edit');
-Route::put('/kesehatan/{id}',       [KesehatanController::class, 'update'])->name('kesehatan.update');
-Route::delete('/kesehatan/{id}',    [KesehatanController::class, 'destroy'])->name('kesehatan.destroy');
+// =============================================
+// RESOURCE DETAIL PENJUALAN
+// =============================================
+Route::resource('detail-penjualan', DetailPenjualanController::class);
